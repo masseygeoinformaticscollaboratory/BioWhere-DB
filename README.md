@@ -2,11 +2,12 @@
 <p>BioWhere database is the database for BioWhere project which includes data from Land Information New 
     Zealand(LINZ), Open Street Map(OSM) and GeoNames. The structure of database comes from BioWhere 
     Data Model. We also provide BioWhere database web page to visualize the data on the leaflet map. </p>
-<h2>Component</h2>
+<h2>Components</h2>
+<p>The relationships and components are shown below:</p>
 <img src="img/structure.png" alt="building progress">
 <h3>BioWhere data Model</h3>
 <img src="img/datamodel.png" alt="datamodel">
-<p>BioWhere data model define tables, columns, and relationships which are the guidance in creating 
+<p>BioWhere data model defines tables, columns, and relationships which are the guidance in creating 
     BioWhere database.</p>
 <h3>BioWhere Database</h3>
 <p>BioWhere database is based on PostgreSQL with PostGIS extension which will restore the geodata from 
