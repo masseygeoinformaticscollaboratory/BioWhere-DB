@@ -2,6 +2,11 @@
 <p>BioWhere database is the database for BioWhere project which includes data from Land Information New 
     Zealand(LINZ), Open Street Map(OSM) and GeoNames. The structure of database comes from BioWhere 
     Data Model. We also provide BioWhere database web page to visualize the data on the leaflet map. </p>
+<h3>Project Structure</h3>
+<ul>
+    <li>Database building script is under the folder "jupiter". All the .shp files needed in database operations are located under "D:\BioWhereDB" in VM "kstock-03"</li>
+    <li>The repository is a Python flask application for the web interface. To use it, clone the repository and open it in Pycharm after the database operations.</li>
+</ul>
 <h3>Components</h3>
 <p>The relationships and components are shown below:</p>
 <img src="img/structure.png" alt="building progress">
