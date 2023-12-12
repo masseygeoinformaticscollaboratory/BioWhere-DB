@@ -5,7 +5,7 @@
 <h3>Project Structure</h3>
 <ul>
     <li>Database building script is under the folder "jupiter". All the .shp files needed in database operations are located under "D:\BioWhereDB" in VM "kstock-03"</li>
-    <li>The repository is a Python flask application for the web interface. To use it, clone the repository and open it in Pycharm. Make sure you have done all database operations before running web interface.</li>
+    <li>The repository is a Python flask application for the web interface. To use it, clone the repository and open it in Pycharm. Make sure you have done all database operations before running the web interface.</li>
 </ul>
 <h3>Components</h3>
 <p>The relationships and components are shown below:</p>
