@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BioWhere Gazetteer for New Zealand</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="../static/styles.css" />
+
+  <!-- External Libraries -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+
+  <!-- Minimal visual tweaks (keep dropdown on top even if you move it later) -->
+  <style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .nav-links a { text-decoration:none; margin-right:1rem; }
+    .left-panel { display:flex; flex-direction:column; gap:.75rem; }
+    .search-bar-panel {
+      display:flex; align-items:center; gap:.5rem;
+      background:#fff; border:1px solid #e5e9f2; border-radius:10px; padding:.5rem .75rem;
+      box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    }
+    .search-bar-panel i { color:#666; }
+    #search_bar { width:100%; border:0; outline:none; font-size:16px; }
+    #map-container { position:relative; height:70vh; }
+    #map { position:absolute; inset:0; }
+    /* Autocomplete above everything if needed */
+    .ui-autocomplete { z-index: 2000 !important; }
+    @media (max-width: 900px){
+      #map-container { height: 55vh; }
+    }
+  </style>
+</head>
+<body>
+    <h1>
+        <div class="nav-links">
+          <a href="/about" class="active">About Us</a>
+          <a href="/contact" class="active">Contact Us</a>
+        </div>
+        BioWhere Gazetteer for New Zealand
+    </h1>
+
+  <div class="container">
+    <!-- Left: Search (above) + Map -->
+    <div class="left-panel">
+      <div class="search-bar-panel">
+        <i class="fas fa-search" aria-hidden="true"></i>
+        <input type="text" id="search_bar" placeholder="Search the place here" aria-label="Search the place here" />
+      </div>
+
+      <div id="map-container">
+        <div id="map"></div>
+      </div>
+
+      <!-- Add Feature Modal -->
+      <div id="addFeatureModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+        <div style="background:#fff; padding:20px; max-width:500px; margin:10% auto; border-radius:4px;">
+          <h3>Add New Feature</h3>
+          <form id="addFeatureForm">
+            <label>Name:</label>
+            <input type="text" name="name" id="featureNameInput" style="width:100%;" required>
+
+            <label>Feature Type:</label>
+            <input type="text" name="feature_type" id="featureTypeInput" style="width:100%;" required>
+
+            <label>Feature Description:</label>
+            <textarea name="feature_description" id="featureDescription" style="width:100%;"></textarea>
+
+            <label>Whakapapa/Origin:</label>
+            <textarea name="whakapapa" id="whakapapaInput" style="width:100%;"></textarea>
+
+            <label>Your Name:</label>
+            <input type="text" name="creator" id="creatorNameInput" style="width:100%;" required>
+
+            <div style="margin-top:10px;">
+              <button type="submit">Save Feature</button>
+              <button type="button" id="cancelFeatureButton">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Details + Modals -->
+    <div class="right-panel">
+      <div id="feature_details">
+        <h2>Feature Details</h2>
+        <p>Select a feature to see details here.</p>
+      </div>
+
+      <!-- Alt Name Modal -->
+      <div id="altNameModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+        <div style="background:#fff; padding:20px; max-width:400px; margin:10% auto; border-radius:4px; position:relative;">
+          <h3>Add Alternative Name</h3>
+          <label for="altNameInput">Alternative Name:</label>
+          <input type="text" id="altNameInput" style="width:100%;">
+          <label for="altNameUserInput" style="margin-top:10px; display:block;">Your Name:</label>
+          <input type="text" id="altNameUserInput" style="width:100%;">
+          <div style="margin-top:10px;">
+            <button id="saveAltNameButton">Save</button>
+            <button id="cancelAltNameButton">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Whakapapa Modal -->
+      <div id="whakapapaModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+        <div style="background:#fff; padding:20px; max-width:500px; margin:10% auto; border-radius:4px; position:relative;">
+          <h3>Add Kōrero</h3>
+          <label for="whakapapaInput">Kōrero (Origin) Text:</label>
+          <textarea id="whakapapaInput" style="width:100%; height:150px;"></textarea>
+          <label for="usernameInput" style="margin-top:10px; display:block;">Your Name:</label>
+          <input type="text" id="usernameInput" style="width:100%; border:1px solid #ccc; padding:5px;">
+          <div style="margin-top:10px;">
+            <button id="saveWhakapapaButton">Save</button>
+            <button id="cancelWhakapapaButton">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ancestor Modal -->
+      <div id="ancestorModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000;">
+        <div style="background:#fff; padding:20px; max-width:500px; margin:10% auto; border-radius:4px; position:relative;">
+          <h3>Add Tipuna</h3>
+          <label for="ancestorInput">Tipuna/Ancestor(s) related to the place:</label>
+          <textarea id="ancestorInput" style="width:100%; height:150px;"></textarea>
+          <label for="usernameInput" style="margin-top:10px; display:block;">Your Name:</label>
+          <input type="text" id="usernameInput" style="width:100%; border:1px solid #ccc; padding:5px;">
+          <div style="margin-top:10px;">
+            <button id="saveAncestorButton">Save</button>
+            <button id="cancelAncestorButton">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Your JS moved to a separate file (content unchanged) -->
+  <script src="../static/app.js"></script>
+</body>
+</html>
